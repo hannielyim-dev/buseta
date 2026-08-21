@@ -11,6 +11,7 @@ var countdownNumber = 30;
 var activeRouteList = [];
 var etaList = [];
 var isReload = true;
+var message = "";
 
 // 2. Listen for when the user picks a new option
 versionDropdown.addEventListener("change", function(event) {
@@ -42,6 +43,7 @@ versionDropdown.addEventListener("change", function(event) {
     ];
 	
 	isReload = true;
+	message = "";
     
     // Start tracking the live updates automatically
     startLiveTracking();
@@ -57,7 +59,8 @@ versionDropdown.addEventListener("change", function(event) {
       {"tagId": "id8", "route": "90", "routeType": "b", "dir":"", "dir2":"O", "stopId": "", "stopId2": "002212", "syncTime": "1000-1900", "syncWkday": "1234567"}
     ];
 	
-	isReload = true;    
+	isReload = true;  
+	message = "";  
 	
 	// Start tracking the live updates automatically
     startLiveTracking();
@@ -146,6 +149,7 @@ async function getBusETAData(pBus, url, isCtb = false) {
 
         if (!data.data || data.data.length === 0) {
             console.log(`路線 ${pBus.route} 暫無實時班次資訊`);
+			message += `路線 ${pBus.route} 暫無實時班次資訊`;
             return; // FIXED 2: 安全退出函數，不用 continue
         }
         
@@ -179,6 +183,7 @@ async function getBusETAData(pBus, url, isCtb = false) {
         }
     } catch (err) {
         console.error("讀取 API 發生錯誤:", err);
+		message += "讀取 API 發生錯誤:" + err;
     }
 }
 // 核心主渲染函數
@@ -211,6 +216,7 @@ async function fetchBusETA(routeList) {
         
       var directionPath = bus.dir === "O" ? "outbound" : "inbound";
       console.log(`正在處理: ${bus.route} , 站點 ID: ${bus.stopId}`);
+	  message += `正在處理: ${bus.route} , 站點 ID: ${bus.stopId}`;
       
 	  etaList = []; // 每次處理新路線前清空
 
@@ -352,6 +358,8 @@ async function fetchBusETA(routeList) {
   } catch (error) {
     resultsDiv.innerHTML = "<span style='color:red;'>資料加載錯誤，請檢查網路連線。</span>";
     console.error("主渲染程式錯誤:", error);
+	message += "主渲染程式錯誤:", error;
 	isReload = true;
   }
+  document.getElementById("message").innerHTML = message;
 }
