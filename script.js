@@ -125,9 +125,19 @@ function getBusETADataXHR(pBus, url, isCtb, callback) {
                         callback();
                         return;
                     }
-                    var filteredData = data.data.filter(function(item) {
-                        return isCtb ? (item.route === pBus.route && item.dir === pBus.dir2) : (item.route === pBus.route && item.dir === pBus.dir);
-                    });
+                    var filteredData = [];
+					for (var i = 0; i < data.data.length; i++) {
+						var item = data.data[i];
+						if (isCtb) {
+							if (item.route === pBus.route && item.dir === pBus.dir2) {
+								filteredData.push(item);
+							}
+						} else {
+							if (item.route === pBus.route && item.dir === pBus.dir) {
+								filteredData.push(item);
+							}
+						}
+					}
                     if (filteredData.length > 0) {
                         for (var cnt = 0; cnt < filteredData.length; cnt++) {
                             var etaItem = filteredData[cnt]; 
