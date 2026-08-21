@@ -98,11 +98,11 @@ function isBusActiveTodayNow(bus) {
   
   var currentHour = padZero(now.getHours());
   var currentMin = padZero(now.getMinutes());
-  var currentTimeNum = parseInt(String(currentHour) + String(currentMin)); 
+  var currentTimeNum = parseInt(String(currentHour) + String(currentMin), 10);  
   
   var timeParts = bus.syncTime.split('-'); 
-  var startTimeNum = parseInt(timeParts[0]);
-  var endTimeNum = parseInt(timeParts[1]);
+  var startTimeNum = parseInt(timeParts[0], 10);
+  var endTimeNum = parseInt(timeParts[1], 10);
   
   if (currentTimeNum < startTimeNum || currentTimeNum > endTimeNum) return false; 
   return true; 
