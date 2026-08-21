@@ -1,4 +1,3 @@
-var versionDropdown = document.getElementById("version");
 var versionCurrent = 1;
 
 var refreshTimer = null;
@@ -9,7 +8,7 @@ var activeRouteList = [];
 var etaList = [];
 var isReload = true;
 var message = "";
-
+/*
 versionDropdown.addEventListener("change", function(event) {
   var selectedVersion = event.target.value;
   stopLiveTracking();
@@ -31,7 +30,7 @@ versionDropdown.addEventListener("change", function(event) {
       {"tagId": "id4", "route": "286C", "routeType": "w", "dir":"O", "dir2":"", "stopId": "B1A047E011F022D2", "stopId2": "", "syncTime": "1032-1900", "syncWkday": "1234567"},
       {"tagId": "id5", "route": "40X", "routeType": "w", "dir":"O", "dir2":"", "stopId": "0D4E07F475845DB3", "stopId2": "", "syncTime": "1200-1700", "syncWkday": "1234567"},
       {"tagId": "id6", "route": "680", "routeType": "r", "dir":"O", "dir2":"I", "stopId": "0C81107C4ABFCD56", "stopId2": "003075", "syncTime": "0700-2030", "syncWkday": "1234567"},
-	  {"tagId": "id9", "route": "980X", "routeType": "g", "dir":"I", "dir2":"", "stopId": "52C01B7F122297BD", "stopId2": "001034", "syncTime": "1750-1930", "syncWkday": "12345"}
+	  {"tagId": "id9", "route": "980X", "routeType": "g", "dir":"I", "dir2":"I", "stopId": "52C01B7F122297BD", "stopId2": "001034", "syncTime": "1750-1930", "syncWkday": "12345"}
     ];
     isReload = true;
     startLiveTracking();
@@ -50,6 +49,64 @@ versionDropdown.addEventListener("change", function(event) {
     startLiveTracking();
   }    
 });
+*/
+
+window.addEventListener("DOMContentLoaded", function() {
+  var searchString = window.location.search;
+  
+  // 相容 /id=X 的網址格式
+  if (!searchString && window.location.href.indexOf('id=') !== -1) {
+    var parts = window.location.href.split('id=');
+    searchString = '?id=' + parts[parts.length - 1];
+  }
+  
+  var urlParams = new URLSearchParams(searchString);
+  var idParam = urlParams.get('id'); 
+  
+  // 如果網址沒有帶 id，預設載入版本 1
+  if (!idParam) { idParam = "1"; }
+  
+  // 執行載入
+  loadVersionData(idParam);
+});
+// 💡 2. 將原本的判斷邏輯獨立成一個 Function
+function loadVersionData(selectedVersion) {
+  stopLiveTracking();
+  
+  if (selectedVersion === "1") {
+    alert("Loading version 1 features...");
+    versionCurrent = 1;
+  } else if (selectedVersion === "2") {
+    versionCurrent = 2;
+    if(document.getElementById('weather')) document.getElementById('weather').style.display = 'none';
+    if(document.getElementById('results')) document.getElementById('results').style.width = '100%';
+    
+    activeRouteList = [
+      {"tagId": "id2", "route": "40E", "routeType": "w", "dir":"O", "dir2":"", "stopId": "0D4E07F475845DB3", "stopId2": "", "syncTime": "0700-0900", "syncWkday": "12345"},
+      {"tagId": "id3", "route": "980X", "routeType": "g", "dir":"O", "dir2":"", "stopId": "6BD93B827893E41E", "stopId2": "003083", "syncTime": "0700-0900", "syncWkday": "12345"},
+      {"tagId": "id1", "route": "89D", "routeType": "w", "dir":"O", "dir2":"", "stopId": "6BD93B827893E41E", "stopId2": "", "syncTime": "0700-2300", "syncWkday": "67"},
+      {"tagId": "id7", "route": "287", "routeType": "w", "dir":"I", "dir2":"", "stopId": "0D4E07F475845DB3", "stopId2": "", "syncTime": "0700-2200", "syncWkday": "1234567"},
+      {"tagId": "id4", "route": "286C", "routeType": "w", "dir":"O", "dir2":"", "stopId": "B1A047E011F022D2", "stopId2": "", "syncTime": "1032-1900", "syncWkday": "1234567"},
+      {"tagId": "id5", "route": "40X", "routeType": "w", "dir":"O", "dir2":"", "stopId": "0D4E07F475845DB3", "stopId2": "", "syncTime": "1200-1700", "syncWkday": "1234567"},
+      {"tagId": "id6", "route": "680", "routeType": "r", "dir":"O", "dir2":"I", "stopId": "0C81107C4ABFCD56", "stopId2": "003075", "syncTime": "0700-2030", "syncWkday": "1234567"},
+	  {"tagId": "id9", "route": "980X", "routeType": "g", "dir":"I", "dir2":"I", "stopId": "52C01B7F122297BD", "stopId2": "001034", "syncTime": "1750-1930", "syncWkday": "12345"}
+    ];
+    isReload = true;
+    startLiveTracking();
+    
+  } else if (selectedVersion === "3") {
+    versionCurrent = 3;
+    if(document.getElementById('weather')) document.getElementById('weather').style.display = 'none';
+    if(document.getElementById('results')) document.getElementById('results').style.width = '100%';
+
+    activeRouteList = [
+      {"tagId": "id7", "route": "97", "routeType": "b", "dir":"", "dir2":"O", "stopId": "", "stopId2": "002212", "syncTime": "0500-1000", "syncWkday": "12345"},
+      {"tagId": "id8", "route": "90", "routeType": "b", "dir":"", "dir2":"O", "stopId": "", "stopId2": "002212", "syncTime": "1000-1900", "syncWkday": "1234567"}
+    ];
+    isReload = true;
+    startLiveTracking();
+  }    
+}
 
 function startLiveTracking() {
     fetchBusETA(activeRouteList);
