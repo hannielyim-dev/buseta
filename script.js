@@ -100,10 +100,14 @@ function isBusActiveTodayNow(bus) {
   var currentMin = padZero(now.getMinutes());
   var currentTimeNum = parseInt(String(currentHour) + String(currentMin), 10);  
   
-  var timeParts = bus.syncTime.split('-'); 
-  var startTimeNum = parseInt(timeParts[0], 10);
-  var endTimeNum = parseInt(timeParts[1], 10);
+  if (!bus.syncTime || bus.syncTime.length < 9) return true;
+  var startStr = bus.syncTime.substring(0, 4);
+  var endStr = bus.syncTime.substring(5, 9);
   
+  var startTimeNum = parseInt(startStr, 10);
+  var endTimeNum = parseInt(endStr, 10);
+  
+  if (isNaN(startTimeNum) || isNaN(endTimeNum)) return true;
   if (currentTimeNum < startTimeNum || currentTimeNum > endTimeNum) return false; 
   return true; 
 }
@@ -217,7 +221,7 @@ function fetchBusETA(routeList) {
                 
                 var dynamicRemainingText = "";
                 if (item.eta) {
-                    var totalSeconds = Math.floor((new Date(item.eta) - new Date()) / 1000);
+                    var totalSeconds = Math.floor((new Date(item.eta).getTime() - new Date().getTime()) / 1000);
                     if (totalSeconds > 0) {
                         var diffMinutes = Math.floor(totalSeconds / 60);
                         var fontSizeStyle = (cnt === 0) ? "font-size: 80px; line-height: 80px;" : "font-size: 22px;";
