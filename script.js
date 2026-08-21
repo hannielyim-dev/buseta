@@ -4,52 +4,29 @@ var refreshTimer = null;
 var countdownTimer = null;
 var countdownNumber = 30;
 
-var activeRouteList = [];
+// var activeRouteList = [];
 var etaList = [];
 var isReload = true;
 var message = "";
-/*
-versionDropdown.addEventListener("change", function(event) {
-  var selectedVersion = event.target.value;
-  stopLiveTracking();
-  
-  if (selectedVersion === "1") {
-    alert("Loading version 1 features...");
-    versionCurrent = 1;
-  } else if (selectedVersion === "2") {
-    versionCurrent = 2;
-    if(document.getElementById('weather')) document.getElementById('weather').style.display = 'none';
-    if(document.getElementById('results')) document.getElementById('results').style.width = '100%';
-    
-    // 💡 直接讀取來自 routes.js 的資料
-    activeRouteList = [
-      {"tagId": "id2", "route": "40E", "routeType": "w", "dir":"O", "dir2":"", "stopId": "0D4E07F475845DB3", "stopId2": "", "syncTime": "0700-0900", "syncWkday": "12345"},
-      {"tagId": "id3", "route": "980X", "routeType": "g", "dir":"O", "dir2":"", "stopId": "6BD93B827893E41E", "stopId2": "003083", "syncTime": "0700-0900", "syncWkday": "12345"},
-      {"tagId": "id1", "route": "89D", "routeType": "w", "dir":"O", "dir2":"", "stopId": "6BD93B827893E41E", "stopId2": "", "syncTime": "0700-2300", "syncWkday": "67"},
-      {"tagId": "id7", "route": "287", "routeType": "w", "dir":"I", "dir2":"", "stopId": "0D4E07F475845DB3", "stopId2": "", "syncTime": "0700-2200", "syncWkday": "1234567"},
-      {"tagId": "id4", "route": "286C", "routeType": "w", "dir":"O", "dir2":"", "stopId": "B1A047E011F022D2", "stopId2": "", "syncTime": "1032-1900", "syncWkday": "1234567"},
-      {"tagId": "id5", "route": "40X", "routeType": "w", "dir":"O", "dir2":"", "stopId": "0D4E07F475845DB3", "stopId2": "", "syncTime": "1200-1700", "syncWkday": "1234567"},
-      {"tagId": "id6", "route": "680", "routeType": "r", "dir":"O", "dir2":"I", "stopId": "0C81107C4ABFCD56", "stopId2": "003075", "syncTime": "0700-2030", "syncWkday": "1234567"},
-	  {"tagId": "id9", "route": "980X", "routeType": "g", "dir":"I", "dir2":"I", "stopId": "52C01B7F122297BD", "stopId2": "001034", "syncTime": "1750-1930", "syncWkday": "12345"}
-    ];
-    isReload = true;
-    startLiveTracking();
-    
-  } else if (selectedVersion === "3") {
-    versionCurrent = 3;
-    if(document.getElementById('weather')) document.getElementById('weather').style.display = 'none';
-    if(document.getElementById('results')) document.getElementById('results').style.width = '100%';
 
-    // 💡 直接讀取來自 routes.js 的資料
-    activeRouteList = [
-      {"tagId": "id7", "route": "97", "routeType": "b", "dir":"", "dir2":"O", "stopId": "", "stopId2": "002212", "syncTime": "0500-1000", "syncWkday": "12345"},
-      {"tagId": "id8", "route": "90", "routeType": "b", "dir":"", "dir2":"O", "stopId": "", "stopId2": "002212", "syncTime": "1000-1900", "syncWkday": "1234567"}
-    ];
-    isReload = true;
-    startLiveTracking();
-  }    
-});
-*/
+const CONFIG_URL = 'https://gist.githubusercontent.com/hannielyim-dev/fda2bd3bd3e76275b3e62b0f381cf184/raw/bus_config.json';
+
+async function getConfigByKey(key) {
+  try {
+    const response = await fetch(CONFIG_URL);
+    console.log(response);
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! Status: ${response.status}`);
+    }
+
+    const config = await response.json();
+    return config[key] || null;
+  } catch (error) {
+    console.error('Failed to retrieve config key:', error);
+  }
+}
+
 
 window.addEventListener("DOMContentLoaded", function() {
   var searchString = window.location.search;
@@ -70,7 +47,7 @@ window.addEventListener("DOMContentLoaded", function() {
   loadVersionData(idParam);
 });
 // 💡 2. 將原本的判斷邏輯獨立成一個 Function
-function loadVersionData(selectedVersion) {
+async function loadVersionData(selectedVersion) {
   stopLiveTracking();
   
   if (selectedVersion === "1") {
@@ -81,34 +58,24 @@ function loadVersionData(selectedVersion) {
     if(document.getElementById('weather')) document.getElementById('weather').style.display = 'none';
     if(document.getElementById('results')) document.getElementById('results').style.width = '100%';
     
-    activeRouteList = [
-      {"tagId": "id2", "route": "40E", "routeType": "w", "dir":"O", "dir2":"", "stopId": "0D4E07F475845DB3", "stopId2": "", "syncTime": "0700-0900", "syncWkday": "12345"},
-      {"tagId": "id3", "route": "980X", "routeType": "g", "dir":"O", "dir2":"", "stopId": "6BD93B827893E41E", "stopId2": "003083", "syncTime": "0700-0900", "syncWkday": "12345"},
-      {"tagId": "id1", "route": "89D", "routeType": "w", "dir":"O", "dir2":"", "stopId": "6BD93B827893E41E", "stopId2": "", "syncTime": "0700-2300", "syncWkday": "67"},
-      {"tagId": "id7", "route": "287", "routeType": "w", "dir":"I", "dir2":"", "stopId": "0D4E07F475845DB3", "stopId2": "", "syncTime": "0700-2200", "syncWkday": "1234567"},
-      {"tagId": "id4", "route": "286C", "routeType": "w", "dir":"O", "dir2":"", "stopId": "B1A047E011F022D2", "stopId2": "", "syncTime": "1032-1900", "syncWkday": "1234567"},
-      {"tagId": "id5", "route": "40X", "routeType": "w", "dir":"O", "dir2":"", "stopId": "0D4E07F475845DB3", "stopId2": "", "syncTime": "1200-1700", "syncWkday": "1234567"},
-      {"tagId": "id6", "route": "680", "routeType": "r", "dir":"O", "dir2":"I", "stopId": "0C81107C4ABFCD56", "stopId2": "003075", "syncTime": "0700-2030", "syncWkday": "1234567"},
-	  {"tagId": "id9", "route": "980X", "routeType": "g", "dir":"I", "dir2":"I", "stopId": "52C01B7F122297BD", "stopId2": "001034", "syncTime": "1750-1930", "syncWkday": "12345"}
-    ];
     isReload = true;
-    startLiveTracking();
+    // 💡 Use 'await' to resolve the Promise into the actual route array
+    const routeList = await getConfigByKey("2");
+    if (routeList) startLiveTracking(routeList);
     
   } else if (selectedVersion === "3") {
     versionCurrent = 3;
     if(document.getElementById('weather')) document.getElementById('weather').style.display = 'none';
     if(document.getElementById('results')) document.getElementById('results').style.width = '100%';
 
-    activeRouteList = [
-      {"tagId": "id7", "route": "97", "routeType": "b", "dir":"", "dir2":"O", "stopId": "", "stopId2": "002212", "syncTime": "0500-1000", "syncWkday": "12345"},
-      {"tagId": "id8", "route": "90", "routeType": "b", "dir":"", "dir2":"O", "stopId": "", "stopId2": "002212", "syncTime": "1000-1900", "syncWkday": "1234567"}
-    ];
     isReload = true;
-    startLiveTracking();
+    // 💡 Use 'await' to resolve the Promise into the actual route array
+    const routeList = await getConfigByKey("3");
+    if (routeList) startLiveTracking(routeList);
   }    
 }
 
-function startLiveTracking() {
+function startLiveTracking(activeRouteList) {
     fetchBusETA(activeRouteList);
     startCountdown();
     refreshTimer = setInterval(function() {
@@ -148,25 +115,33 @@ function padZero(num) {
 function isBusActiveTodayNow(bus) {
   var now = new Date();
   var currentDay = now.getDay();
-  if (currentDay === 0) currentDay = 7; 
+  if (currentDay === 0) currentDay = 7; // Convert Sunday to 7
   
   var allowedDays = bus.syncWkday.split(''); 
   if (allowedDays.indexOf(String(currentDay)) === -1) return false; 
   
-  var currentHour = padZero(now.getHours());
-  var currentMin = padZero(now.getMinutes());
-  var currentTimeNum = parseInt(String(currentHour) + String(currentMin), 10);  
-  
   if (!bus.syncTime || bus.syncTime.length < 9) return true;
+
+  // Total minutes past midnight for the current time
+  var currentTotalMinutes = (now.getHours() * 60) + now.getMinutes();
+
+  // Parse start time (e.g., "0158" -> 1 hour * 60 + 58 mins = 118 mins)
   var startStr = bus.syncTime.substring(0, 4);
+  var startHours = parseInt(startStr.substring(0, 2), 10);
+  var startMins = parseInt(startStr.substring(2, 4), 10);
+  var startTotalMinutes = (startHours * 60) + startMins;
+
+  // Parse end time (e.g., "0159" -> 1 hour * 60 + 59 mins = 119 mins)
   var endStr = bus.syncTime.substring(5, 9);
-  
-  var startTimeNum = parseInt(startStr, 10);
-  var endTimeNum = parseInt(endStr, 10);
-  
-  if (isNaN(startTimeNum) || isNaN(endTimeNum)) return true;
-  if (currentTimeNum < startTimeNum || currentTimeNum > endTimeNum) return false; 
-  return true; 
+  var endHours = parseInt(endStr.substring(0, 2), 10);
+  var endMins = parseInt(endStr.substring(2, 4), 10);
+  var endTotalMinutes = (endHours * 60) + endMins;
+
+  console.log(currentTotalMinutes + "(" + startTotalMinutes + "-" + endTotalMinutes + ")" );
+
+  if (isNaN(startTotalMinutes) || isNaN(endTotalMinutes)) return true;
+
+  return (currentTotalMinutes >= startTotalMinutes && currentTotalMinutes <= endTotalMinutes); 
 }
 
 function getBusETADataXHR(pBus, url, isCtb, callback) {
