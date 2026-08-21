@@ -154,6 +154,13 @@ function getBusETADataXHR(pBus, url, isCtb, callback) {
             callback(); 
         }
     };
+	
+	// 🚨 這是專為解決九巴 HTTPS 連線失敗加裝的防禦保護：
+    xhr.onerror = function() {
+        console.log("XHR 網路連線或安全憑證握手失敗！強制跳往下一條路線。");
+        callback(); // 💡 關鍵：就算九巴 HTTPS 被舊手機阻擋，也強制放行執行 callback，絕不斷線！
+    };
+	
     xhr.send();
 }
 
