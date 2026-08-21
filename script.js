@@ -1,21 +1,21 @@
 // 1. Find your dropdown menu by its ID
-const versionDropdown = document.getElementById("version");
+var versionDropdown = document.getElementById("version");
 var versionCurrent = 1;
 
 // 🕒 GLOBAL TIMERS: Variables to track our 30-second repeating loops
-let refreshTimer = null;
-let countdownTimer = null;
-let countdownNumber = 30;
+var refreshTimer = null;
+var countdownTimer = null;
+var countdownNumber = 30;
 
 // Track the active route list globally so the timer can read it anytime
-let activeRouteList = [];
-let etaList = [];
-let isReload = true;
+var activeRouteList = [];
+var etaList = [];
+var isReload = true;
 
 // 2. Listen for when the user picks a new option
 versionDropdown.addEventListener("change", function(event) {
   
-  const selectedVersion = event.target.value;
+  var selectedVersion = event.target.value;
   console.log("The user selected version: " + selectedVersion);
   
   // Clear any existing active loops whenever the user changes the dropdown selection
@@ -73,7 +73,7 @@ function startLiveTracking() {
     startCountdown();
     
     // Set up the 30-second loop to re-fetch data
-    refreshTimer = setInterval(() => {
+    refreshTimer = setInterval(function() {
         fetchBusETA(activeRouteList);
         startCountdown(); // Reset countdown clock back to 30
     }, 30000); // 30000 ms = 30 seconds
@@ -83,7 +83,7 @@ function startLiveTracking() {
 function stopLiveTracking() {
     clearInterval(refreshTimer);
     clearInterval(countdownTimer);
-    const statusDiv = document.getElementById('timerStatus');
+    var statusDiv = document.getElementById('timerStatus');
     if (statusDiv) {
         statusDiv.innerHTML = "";
     }
@@ -92,13 +92,13 @@ function stopLiveTracking() {
 // 🕒 HELPER: Ticks countdown number down every 1 second on your screen UI
 function startCountdown() {
     countdownNumber = 30;
-    const statusDiv = document.getElementById('timerStatus');
+    var statusDiv = document.getElementById('timerStatus');
     if (!statusDiv) return; // Skip if element doesn't exist in HTML layout
     
     statusDiv.innerHTML = `🔄 自動更新數據倒數：<b>${countdownNumber}</b> 秒...`;
     
     clearInterval(countdownTimer);
-    countdownTimer = setInterval(() => {
+    countdownTimer = setInterval(function() {
         countdownNumber--;
         if (countdownNumber > 0) {
             statusDiv.innerHTML = `🔄 自動更新數據倒數：<b>${countdownNumber}</b> 秒...`;
@@ -109,26 +109,27 @@ function startCountdown() {
 }
 
 function isBusActiveTodayNow(bus) {
-  const now = new Date();
+  var now = new Date();
   
   // 1. 檢查星期幾 (JavaScript 中 0代表星期日, 1-6代表星期一至六)
   // 為了對應你的設定 (1234567，其中7代表星期日)，我們將 0 轉換為 7
-  let currentDay = now.getDay();
+  var currentDay = now.getDay();
   if (currentDay === 0) currentDay = 7; 
   
-  const allowedDays = bus.syncWkday.split(''); // 把 "467" 拆成 ['4', '6', '7']
-  if (!allowedDays.includes(String(currentDay))) {
+  var allowedDays = bus.syncWkday.split(''); // 把 "467" 拆成 ['4', '6', '7']
+  if (!allowedDays.indexOf(String(currentDay)) === -1) return false; // 舊版不支援 includes，改用 indexOf
+  /*if (!allowedDays.includes(String(currentDay))) {
     return false; // 今天不屬於設定的星期，不更新
-  }
+  }*/
   
   // 2. 檢查時間範圍 (例如 "0700-2300")
-  const currentHour = String(now.getHours()).padStart(2, '0');
-  const currentMin = String(now.getMinutes()).padStart(2, '0');
-  const currentTimeNum = parseInt(currentHour + currentMin); // 變成數字例如 0730
+  var currentHour = String(now.getHours()).padStart(2, '0');
+  var currentMin = String(now.getMinutes()).padStart(2, '0');
+  var currentTimeNum = parseInt(currentHour + currentMin); // 變成數字例如 0730
   
-  const timeParts = bus.syncTime.split('-'); // 拆成 ["0700", "2300"]
-  const startTimeNum = parseInt(timeParts[0]);
-  const endTimeNum = parseInt(timeParts[1]);
+  var timeParts = bus.syncTime.split('-'); // 拆成 ["0700", "2300"]
+  var startTimeNum = parseInt(timeParts[0]);
+  var endTimeNum = parseInt(timeParts[1]);
   
   if (currentTimeNum < startTimeNum || currentTimeNum > endTimeNum) {
     return false; // 當前時間不在營運範圍內，不更新
@@ -140,22 +141,29 @@ function isBusActiveTodayNow(bus) {
 // 🚀 FIXED 1: 加上 async 關鍵字處理非同步請求
 async function getBusETAData(pBus, url, isCtb = false) {
     try {
-        const response = await fetch(url);
-        const data = await response.json();
+        var response = await fetch(url);
+        var data = await response.json();
 
         if (!data.data || data.data.length === 0) {
             console.log(`路線 ${pBus.route} 暫無實時班次資訊`);
             return; // FIXED 2: 安全退出函數，不用 continue
         }
         
-        let filteredData = [];
+        var filteredData = [];
         if (isCtb) {
             // 城巴 API 只需要過濾路線名稱
-            filteredData = data.data.filter(item => item.route === pBus.route && item.dir === pBus.dir2);
+			var filteredData = data.data.filter(function(item) {
+				return item.route === pBus.route && item.dir === pBus.dir2;
+			});
+            //filteredData = data.data.filter(item => item.route === pBus.route && item.dir === pBus.dir2);
         } else {
             // 九巴 API 需要過濾路線與方向
-            filteredData = data.data.filter(item => item.route === pBus.route && item.dir === pBus.dir);
+			var filteredData = data.data.filter(function(item) {
+				return item.route === pBus.route && item.dir === pBus.dir;
+			});
+            //filteredData = data.data.filter(item => item.route === pBus.route && item.dir === pBus.dir);
         }
+		
         
         if (filteredData.length === 0) return;
       
@@ -175,22 +183,22 @@ async function getBusETAData(pBus, url, isCtb = false) {
 }
 // 核心主渲染函數
 async function fetchBusETA(routeList) {
-  const resultsDiv = document.getElementById('results');
+  var resultsDiv = document.getElementById('results');
   if (isReload) {
 	resultsDiv.innerHTML = ""; 
   }
 
   try {
-    for (const bus of routeList) {
+    for (var bus of routeList) {
 	  
 	  if (isReload) {
-	  	const card = document.createElement('div');
+	  	var card = document.createElement('div');
 	    card.className = 'eta-card';
 	    card.id = bus.tagId;
 	    card.innerHTML = "";
 	    resultsDiv.appendChild(card);
 	  }
-	  const resultsByRouteDiv = document.getElementById(bus.tagId);
+	  var resultsByRouteDiv = document.getElementById(bus.tagId);
       
 	  if (!isBusActiveTodayNow(bus)) {
         console.log(`[跳過] 路線 ${bus.route} 目前非同步時間`);
@@ -201,26 +209,36 @@ async function fetchBusETA(routeList) {
 		resultsByRouteDiv.className= "eta-card"
 	  }
         
-      const directionPath = bus.dir === "O" ? "outbound" : "inbound";
+      var directionPath = bus.dir === "O" ? "outbound" : "inbound";
       console.log(`正在處理: ${bus.route} , 站點 ID: ${bus.stopId}`);
       
 	  etaList = []; // 每次處理新路線前清空
 
 	  // 1. FIXED 3: 加上 await，並將末端路徑改為正確的 directionPath
 	  if (bus.stopId !== "") { 
-		const url = `https://data.etabus.gov.hk/v1/transport/kmb/eta/${bus.stopId}/${bus.route}/1`;
+		var url = `https://data.etabus.gov.hk/v1/transport/kmb/eta/${bus.stopId}/${bus.route}/1`;
 		await getBusETAData(bus, url, false);
 	  }
 	  
 	  // 2. 讀取聯營城巴 API 
 	  if (bus.stopId2 !== "") { 
-		const ctb_url = `https://rt.data.gov.hk/v2/transport/citybus/eta/ctb/${bus.stopId2}/${bus.route}`;
+		var ctb_url = `https://rt.data.gov.hk/v2/transport/citybus/eta/ctb/${bus.stopId2}/${bus.route}`;
 		await getBusETAData(bus, ctb_url, true);
 	  }
 	  
+	  
+	  etaList.sort(function(a, b) {
+			// 檢查是否有資料，防止因空值（null/undefined）導致程式崩潰
+			if (!a.eta) return 1;
+			if (!b.eta) return -1;
+			
+			// 用 .getTime() 轉做純數字進行精準比較，相容 Android 5 舊 WebView
+			return new Date(a.eta).getTime() - new Date(b.eta).getTime();
+	  });
+	/*
 	  // 新增優化：按時間先後順序對混合後的班次進行排序
 	  etaList.sort((a, b) => new Date(a.eta) - new Date(b.eta));
-	  
+	 */
 	  var displayDetails = "";
       var dest = "未知目的地"; 
 	  
@@ -228,7 +246,7 @@ async function fetchBusETA(routeList) {
 		  displayDetails = "<p style='color:red;'>暫無即時班次更新 (X)</p>";
 	  } else {
           // 最多只顯示 5 班車
-          const loopsToRun = Math.min(etaList.length, 5);
+          var loopsToRun = Math.min(etaList.length, 5);
           
           for (var cnt = 0; cnt < loopsToRun; cnt++) {
             var item = etaList[cnt]; 
@@ -247,12 +265,21 @@ async function fetchBusETA(routeList) {
 				continue;
 			}
 				 
-			const etaTime = new Date(item.eta).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', second:'2-digit'});
-			
-            
+			//var etaTime = new Date(item.eta).toLocavarimeString([], {hour: '2-digit', minute:'2-digit', second:'2-digit'});
+			var etaTime = "無資料";
 
-			
-            
+			if (item.eta) {
+				var dateObj = new Date(item.eta);
+				
+				// 手動提取時、分、秒，並用 padStart 補足兩位數（例如把 9 變成 09）
+				var hours = String(dateObj.getHours()).padStart(2, '0');
+				var minutes = String(dateObj.getMinutes()).padStart(2, '0');
+				var seconds = String(dateObj.getSeconds()).padStart(2, '0');
+				
+				// 拼接成 24 小時制的格式（例如：15:30:45）
+				etaTime = hours + ":" + minutes + ":" + seconds;
+			}
+
             var remark = item.rmk_tc || "";
 			
 			if (bus.stopId !== "" && bus.stopId2 !== "") { 
@@ -262,19 +289,19 @@ async function fetchBusETA(routeList) {
             var dynamicRemainingText = "";
             
             if (item.eta) {
-              const etaDate = new Date(item.eta);
-              const currentDate = new Date();
+              var etaDate = new Date(item.eta);
+              var currentDate = new Date();
               
-              const diffMs = etaDate - currentDate;
-              const totalSeconds = Math.floor(diffMs / 1000);
+              var diffMs = etaDate - currentDate;
+              var totalSeconds = Math.floor(diffMs / 1000);
               
               if (totalSeconds > 0) {
                 var diffMinutes = Math.floor(totalSeconds / 60);
                 var diffSeconds = totalSeconds % 60;
-                const formattedSeconds = String(diffSeconds).padStart(2, '0');
+                var formattedSeconds = String(diffSeconds).padStart(2, '0');
                 
                 // 第一班車的分鐘數放大到 80px，其餘正常顯示
-                let fontSizeStyle = (cnt === 0) ? "font-size: 80px; line-height: 80px;" : "font-size: 22px;";
+                var fontSizeStyle = (cnt === 0) ? "font-size: 80px; line-height: 80px;" : "font-size: 22px;";
 				fontSizeStyle += (diffMinutes <= 5) ? "color: #9E1B1B;" : "";
                 
                 dynamicRemainingText = `<span style="${fontSizeStyle} font-weight:bold;">${diffMinutes}</span>m ${formattedSeconds}s`;
@@ -295,7 +322,7 @@ async function fetchBusETA(routeList) {
           }
       }
 	  
-	  const cardDiv = `
+	  var cardDiv = `
 			<div class="c-route">
 			  <p class="route-general route-${bus.routeType}"><strong>${bus.route}</strong></p>
 			  <p style="color: #555; font-weight: bold;">${dest}</p>
@@ -312,7 +339,7 @@ async function fetchBusETA(routeList) {
 	  } 
 	  /*else {
 		  // 生成網頁上的路線卡片
-		  const card = document.createElement('div');
+		  var card = document.createElement('div');
 		  card.className = 'eta-card';
 		  card.id = bus.tagId;
 		  
