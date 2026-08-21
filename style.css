@@ -1,0 +1,67 @@
+body { 
+	font-family: Arial, sans-serif;
+	}
+#weather-eta {
+	width: 100%; 
+	display: flex; 
+}
+#weather {
+	width: 30%; /* Splits the layout perfectly in half */
+	box-sizing: border-box; /* Crucial: includes padding/borders in the 50% width */
+}
+#results {
+	width: 70%; /* Splits the layout perfectly in half */
+	box-sizing: border-box; /* Crucial: includes padding/borders in the 50% width */
+}
+.eta-time { font-weight: bold; color: #e74c3c; }
+.eta-card {
+	display: flex;
+	width: 100%;
+	margin-bottom: 10px;
+	border-bottom: 1px solid #eee
+}
+.eta-card-inactive {
+	display: flex;
+	width: 100%;
+}
+.c-route {
+	flex: 1; 
+	text-align: center;
+}
+.c-details {
+	flex: 2; 
+	padding-left: 10px;
+}
+.route-general {
+	font-size: 80px;
+	margin: 0;
+}
+/* ⚪ 樣式 W：白底黑字（加上細邊框顯得更清楚） */
+.route-w {
+    background-color: #ffffff !important;
+    color: #000000 !important;
+    border: 2px solid #000000;
+}
+
+/* 🟢 樣式 G：綠底白字（對應普通全日屯門過海線 960 等） */
+.route-g {
+    background-color: #006F3D !important;
+    color: #ffffff !important;
+}
+
+/* 🔴 樣式 R：紅底白字（對應豪華巴士豪華線 P960） */
+.route-r {
+    background-color: #9E1B1B !important;
+    color: #ffffff !important;
+}
+
+.route-b {
+    background-color: #0080FF !important;
+    color: #ffffff !important;
+}
+.eta-row {
+	text-align: right;
+	margin-bottom: 10px;
+	border-bottom: 1px dashed #eee;
+	padding-bottom: 5px;
+}
