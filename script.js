@@ -2,7 +2,7 @@ var versionCurrent = 1;
 
 var refreshTimer = null;
 var countdownTimer = null;
-var countdownNumber = 30;
+var countdownNumber = 15;
 
 // var activeRouteList = [];
 var etaList = [];
@@ -81,7 +81,7 @@ function startLiveTracking(activeRouteList) {
     refreshTimer = setInterval(function() {
         fetchBusETA(activeRouteList);
         startCountdown(); 
-    }, 30000); 
+    }, 15000); 
 }
 
 function stopLiveTracking() {
@@ -92,7 +92,7 @@ function stopLiveTracking() {
 }
 
 function startCountdown() {
-    countdownNumber = 30;
+    countdownNumber = 15;
     var statusDiv = document.getElementById('timerStatus');
     if (!statusDiv) return; 
     statusDiv.innerHTML = "🔄 自動更新數據倒數：<b>" + countdownNumber + "</b> 秒...";
@@ -274,13 +274,17 @@ function fetchBusETA(routeList) {
                     if (totalSeconds > 0) {
                         var diffMinutes = Math.floor(totalSeconds / 60);
                         var fontSizeStyle = (cnt === 0) ? "font-size: 80px; line-height: 80px;" : "font-size: 22px;";
-                        if (diffMinutes <= 5) fontSizeStyle += "color: #9E1B1B;";
+						var rowClass = "eta-row";
+                        if (diffMinutes <= 5) {
+							fontSizeStyle += "color: #9E1B1B;";
+							rowClass = "eta-row flash-red";
+						}
                         dynamicRemainingText = '<span style="' + fontSizeStyle + ' font-weight:bold;">' + diffMinutes + '</span>m ' + padZero(totalSeconds % 60) + 's';
                     } else {
                         dynamicRemainingText = "<span style='color:orange; font-weight:bold;'>抵達中/已過</span>";
                     }
                 } else { dynamicRemainingText = "X"; }
-                displayDetails += '<div class="eta-row"><p style="margin: 2px 0;"><small style="color: #777;">' + remark + '</small> <span style="color: green;">(' + dynamicRemainingText + ')</span><span style="margin-left: 10px; color:blue; font-weight:bold; font-size: 16px;">' + etaTime + '</span></p></div>';
+                displayDetails += '<div class="' + rowClass + '"><p style="margin: 2px 0;"><small style="color: #777;">' + remark + '</small> <span style="color: green;">(' + dynamicRemainingText + ')</span><span style="margin-left: 10px; color:blue; font-weight:bold; font-size: 16px;">' + etaTime + '</span></p></div>';
             }
         }
         var cardDiv = '<div class="c-route"><p class="route-general route-' + bus.routeType + '"><strong>' + bus.route + '</strong></p><p style="color: #555; font-weight: bold;">' + dest + '</p></div><div class="c-details">' + displayDetails + '</div>';
