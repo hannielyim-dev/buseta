@@ -269,12 +269,12 @@ function fetchBusETA(routeList) {
                 if (bus.stopId !== "" && bus.stopId2 !== "") remark = item.company + " - " + remark;
                 
                 var dynamicRemainingText = "";
+				var rowClass = "eta-row";
                 if (item.eta) {
                     var totalSeconds = Math.floor((new Date(item.eta).getTime() - new Date().getTime()) / 1000);
                     if (totalSeconds > 0) {
                         var diffMinutes = Math.floor(totalSeconds / 60);
                         var fontSizeStyle = (cnt === 0) ? "font-size: 80px; line-height: 80px;" : "font-size: 22px;";
-						var rowClass = "eta-row";
                         if (diffMinutes <= 5) {
 							fontSizeStyle += "color: #9E1B1B;";
 							rowClass = "eta-row flash-red";
