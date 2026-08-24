@@ -95,13 +95,15 @@ function startCountdown() {
     countdownNumber = 15;
     var statusDiv = document.getElementById('timerStatus');
     if (!statusDiv) return; 
-    statusDiv.innerHTML = "🔄 自動更新數據倒數：<b>" + countdownNumber + "</b> 秒...";
+    // statusDiv.innerHTML = "🔄 自動更新數據倒數：<b>" + countdownNumber + "</b> 秒...";
+	statusDiv.innerHTML = "<span onclick='window.location.reload();' style='cursor: pointer;' title='點擊重新整理網頁'>🔄 自動更新數據倒數：<b>" + countdownNumber + "</b> 秒...</span>";
     
     clearInterval(countdownTimer);
     countdownTimer = setInterval(function() {
         countdownNumber--;
         if (countdownNumber > 0) {
-            statusDiv.innerHTML = "🔄 自動更新數據倒數：<b>" + countdownNumber + "</b> 秒...";
+            //statusDiv.innerHTML = "🔄 自動更新數據倒數：<b>" + countdownNumber + "</b> 秒...";
+			statusDiv.innerHTML = "<span onclick='window.location.reload();' style='cursor: pointer;' title='點擊重新整理網頁'>🔄 自動更新數據倒數：<b>" + countdownNumber + "</b> 秒...</span>";
         } else {
             clearInterval(countdownTimer);
         }
@@ -137,7 +139,7 @@ function isBusActiveTodayNow(bus) {
   var endMins = parseInt(endStr.substring(2, 4), 10);
   var endTotalMinutes = (endHours * 60) + endMins;
 
-  console.log(currentTotalMinutes + "(" + startTotalMinutes + "-" + endTotalMinutes + ")" );
+  //console.log(currentTotalMinutes + "(" + startTotalMinutes + "-" + endTotalMinutes + ")" );
 
   if (isNaN(startTotalMinutes) || isNaN(endTotalMinutes)) return true;
 
