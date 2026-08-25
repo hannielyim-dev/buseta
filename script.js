@@ -132,7 +132,6 @@ function startLiveTracking(activeRouteList) {
     startCountdown();
     refreshTimer = setInterval(function() {
         fetchBusETA(activeRouteList);
-		fetchHKOData();
         startCountdown(); 
     }, 20000); 
 	 // 🌤️ 2. 天氣邏輯：立刻執行一次，之後每 15 分鐘 (900000 毫秒) 執行一次
