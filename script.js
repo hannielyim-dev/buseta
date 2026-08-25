@@ -14,7 +14,6 @@ var message = "";
 const CONFIG_URL = 'https://gist.githubusercontent.com/hannielyim-dev/fda2bd3bd3e76275b3e62b0f381cf184/raw/bus_config.json';
 const HKO_URL = 'https://data.weather.gov.hk/weatherAPI/opendata/weather.php?dataType=rhrread&lang=tc';
 var hko_last_icon = "";
-var hko_last_message = "";
 
 
 async function getConfigByKey(key) {
@@ -47,7 +46,34 @@ async function fetchHKOData() {
     const icon = hkoData["icon"] || null;
     
     // 💡 修正 2：將原本的引號換行符號 /n 改為網頁適用的 <br> 標籤
-    var message = (hkoData["warningMessage"] || "") + (hkoData["specialWxTips"] || "");
+	var shatinTemp = "N/A";
+    var shatinRain = "0";
+
+    // (A) 尋找沙田的氣溫
+    if (hkoData.temperature && hkoData.temperature.data) {
+        const tempArray = hkoData.temperature.data;
+        for (var i = 0; i < tempArray.length; i++) {
+            if (tempArray[i].place === "沙田") {
+				shatinTemp = tempArray[i].value + "°" + tempArray[i].unit; // 取得溫度數值
+                break;
+            }
+        }
+    }
+
+    // (B) 尋找沙田的雨量
+    if (hkoData.rainfall && hkoData.rainfall.data) {
+        const rainArray = hkoData.rainfall.data;
+        for (var j = 0; j < rainArray.length; j++) {
+            if (rainArray[j].place === "沙田") {
+                // 天文台雨量資料通常會提供最高值 (max)
+                shatinRain = rainArray[j].max !== undefined ? rainArray[j].max : (rainArray[j].value || "0");
+                break;
+            }
+        }
+    }
+	
+	
+    var message = "<p style='font-size: 30px; margin: 0'><strong>" +(shatinTemp) + "  ☔︎" +(shatinRain) + "</strong></p>" + (hkoData["warningMessage"] || "") + (hkoData["specialWxTips"] || "");
     console.log("HKO data: " + icon + "," + message);
 	
     // 顯示同步時間
@@ -65,12 +91,11 @@ async function fetchHKOData() {
         weatherIcon.src = "https://www.hko.gov.hk/images/HKOWxIconOutline/pic" + icon + ".png";
     }
 		
-    if (weatherMsg && hko_last_message !== message) {
+    if (weatherMsg) {
         weatherMsg.innerHTML = message;
     }
 	
     hko_last_icon = icon;
-    hko_last_message = message;
 	
   } catch (error) {
     console.error('Failed to retrieve HKO Data:', error);
