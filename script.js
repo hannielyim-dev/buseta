@@ -15,6 +15,8 @@ const CONFIG_URL = 'https://gist.githubusercontent.com/hannielyim-dev/fda2bd3bd3
 const HKO_URL = 'https://data.weather.gov.hk/weatherAPI/opendata/weather.php?dataType=rhrread&lang=tc';
 var hko_last_icon = "";
 
+var is_data_found = false;
+
 
 async function getConfigByKey(key) {
   try {
@@ -91,8 +93,12 @@ async function fetchHKOData() {
         weatherIcon.src = "https://www.hko.gov.hk/images/HKOWxIconOutline/pic" + icon + ".png";
     }
 		
+	if (versionCurrent === "2") {
+		message = message.replace("市民", "牛姐");
+	}
+		
     if (weatherMsg) {
-        weatherMsg.innerHTML = message.replace("市民", "牛姐");
+        weatherMsg.innerHTML = message;
     }
 	
     hko_last_icon = icon;
@@ -130,25 +136,20 @@ async function loadVersionData(selectedVersion) {
   if (selectedVersion === "1") {
     alert("Loading version 1 features...");
     versionCurrent = 1;
-  } else if (selectedVersion === "2") {
-    versionCurrent = 2;
-    if(document.getElementById('weather')) document.getElementById('weather').style.width = '20%';
-    if(document.getElementById('results')) document.getElementById('results').style.width = '80%';
-    
-    isReload = true;
+  } else {
     // 💡 Use 'await' to resolve the Promise into the actual route array
-    const routeList = await getConfigByKey("2");
-    if (routeList) startLiveTracking(routeList);
-    
-  } else if (selectedVersion === "3") {
-    versionCurrent = 3;
-    if(document.getElementById('weather')) document.getElementById('weather').style.display = '20%';
-    if(document.getElementById('results')) document.getElementById('results').style.width = '80%';
-
-    isReload = true;
-    // 💡 Use 'await' to resolve the Promise into the actual route array
-    const routeList = await getConfigByKey("3");
-    if (routeList) startLiveTracking(routeList);
+	const routeList = await getConfigByKey(selectedVersion);
+	if (routeList) {
+		versionCurrent = selectedVersion;
+		console.log("Version Selected: " + selectedVersion);
+		if(document.getElementById('weather')) document.getElementById('weather').style.width = '20%';
+		if(document.getElementById('results')) document.getElementById('results').style.width = '80%';
+		
+		isReload = true;
+		startLiveTracking(routeList);
+	} else {
+		alert("No setting found");
+	}
   }    
 }
 
@@ -156,6 +157,9 @@ function startLiveTracking(activeRouteList) {
     fetchBusETA(activeRouteList);
     startCountdown();
     refreshTimer = setInterval(function() {
+		if (is_data_found === false) {
+			window.location.reload();
+		}
         fetchBusETA(activeRouteList);
         startCountdown(); 
     }, 20000); 
@@ -286,6 +290,7 @@ function fetchBusETA(routeList) {
   var resultsDiv = document.getElementById('results');
   if (isReload) resultsDiv.innerHTML = ""; 
   message = "";
+  is_data_found = false;
 
   function processRouteAtIndex(index) {
     if (index >= routeList.length) {
@@ -372,6 +377,7 @@ function fetchBusETA(routeList) {
                 } else { dynamicRemainingText = "X"; }
                 displayDetails += '<div class="' + rowClass + '"><p class="eta-remain-time"> <span style="color: green;">(' + dynamicRemainingText + ')</p></span><div style="display: inline-block;"><small style="color: #777;">' + remark + '</small><br><span class="eta-time">' + etaTime + '</span></p></div></div>';
             }
+			is_data_found = true;
         }
 		
 		// 💡 1. 檢查路線名稱（例如 "89D"）的最後一個字元是不是英文字母 (A-Z)
