@@ -2,7 +2,9 @@ var versionCurrent = 1;
 
 var refreshTimer = null;
 var countdownTimer = null;
-var countdownNumber = 15;
+var countdownNumber = 20;
+
+var weatherTimer = null; 
 
 // var activeRouteList = [];
 var etaList = [];
@@ -13,6 +15,7 @@ const CONFIG_URL = 'https://gist.githubusercontent.com/hannielyim-dev/fda2bd3bd3
 const HKO_URL = 'https://data.weather.gov.hk/weatherAPI/opendata/weather.php?dataType=rhrread&lang=tc';
 var hko_last_icon = "";
 var hko_last_message = "";
+
 
 async function getConfigByKey(key) {
   try {
@@ -30,7 +33,8 @@ async function getConfigByKey(key) {
   }
 }
 
-async function getHKOData() {
+// 💡 修正 1：在 function 前面務必加上 async
+async function fetchHKOData() {
   try {
     const response = await fetch(HKO_URL);
     console.log(response);
@@ -40,33 +44,39 @@ async function getHKOData() {
     }
 
     const hkoData = await response.json();
-	const icon = hkoData["icon"] || null;
-	const message = (hkoData["warningMessage"] || "") + ( hkoData["specialWxTips"] || "");
+    const icon = hkoData["icon"] || null;
+    
+    // 💡 修正 2：將原本的引號換行符號 /n 改為網頁適用的 <br> 標籤
+    var message = (hkoData["warningMessage"] || "") + (hkoData["specialWxTips"] || "");
     console.log("HKO data: " + icon + "," + message);
 	
-	if (hko_last_icon !== icon || hko_last_message !== message) {
-		var weatherDiv = document.getElementById("weather");
+    // 顯示同步時間
+    var now = new Date();
+    var lastSyncTime = padZero(now.getHours()) + ":" + padZero(now.getMinutes());
+    
+    // 💡 這裡改用 <br>，這樣在網頁 innerHTML 渲染時才會真正換行
+    message += "<br>(" + lastSyncTime + ")";
+	
+    var weatherIcon = document.getElementById("weather-icon");
+    var weatherMsg = document.getElementById("weather-msg");
 		
-		if (weatherDiv) {
-			divContent = "";
-			if (icon !== null) {
-				// 2. 將 HKO 網址填入圖片標籤，並設定寬高使其不超出卡片
-				divContent += '<img src="https://www.hko.gov.hk/images/HKOWxIconOutline/pic'+icon+'.png" alt="天氣圖標" style="max-width: 100%; height: auto;">';
-			}
-			if (message !== null) {
-				// 2. 將 HKO 網址填入圖片標籤，並設定寬高使其不超出卡片
-				divContent += '<p>'+message+'</p>';
-			}
-			weatherDiv.innerHTML = divContent;
-		}
-	}
-	hko_last_icon = icon;
-	hko_last_message = message;
+    // 💡 修正 3：利用標準的字串相加，把 icon 變數正確拼進網址中
+    if (weatherIcon && hko_last_icon !== icon && icon) {
+        weatherIcon.src = "https://www.hko.gov.hk/images/HKOWxIconOutline/pic" + icon + ".png";
+    }
+		
+    if (weatherMsg && hko_last_message !== message) {
+        weatherMsg.innerHTML = message;
+    }
+	
+    hko_last_icon = icon;
+    hko_last_message = message;
 	
   } catch (error) {
     console.error('Failed to retrieve HKO Data:', error);
   }
 }
+
 
 
 window.addEventListener("DOMContentLoaded", function() {
@@ -87,6 +97,7 @@ window.addEventListener("DOMContentLoaded", function() {
   // 執行載入
   loadVersionData(idParam);
 });
+
 // 💡 2. 將原本的判斷邏輯獨立成一個 Function
 async function loadVersionData(selectedVersion) {
   stopLiveTracking();
@@ -118,24 +129,29 @@ async function loadVersionData(selectedVersion) {
 
 function startLiveTracking(activeRouteList) {
     fetchBusETA(activeRouteList);
-	getHKOData();
     startCountdown();
     refreshTimer = setInterval(function() {
         fetchBusETA(activeRouteList);
-		getHKOData();
+		fetchHKOData();
         startCountdown(); 
-    }, 15000); 
+    }, 20000); 
+	 // 🌤️ 2. 天氣邏輯：立刻執行一次，之後每 15 分鐘 (900000 毫秒) 執行一次
+    fetchHKOData();
+    weatherTimer = setInterval(function() {
+        fetchHKOData();
+    }, 900000); // 15 分鐘
 }
 
 function stopLiveTracking() {
     clearInterval(refreshTimer);
     clearInterval(countdownTimer);
+    clearInterval(weatherTimer); // 💡 停止追蹤時，記得也要清除天氣計時器
     var statusDiv = document.getElementById('timerStatus');
     if (statusDiv) statusDiv.innerHTML = "";
 }
 
 function startCountdown() {
-    countdownNumber = 15;
+    countdownNumber = 20;
     var statusDiv = document.getElementById('timerStatus');
     if (!statusDiv) return; 
     // statusDiv.innerHTML = "🔄 自動更新數據倒數：<b>" + countdownNumber + "</b> 秒...";
