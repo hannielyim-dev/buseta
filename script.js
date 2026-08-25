@@ -10,6 +10,9 @@ var isReload = true;
 var message = "";
 
 const CONFIG_URL = 'https://gist.githubusercontent.com/hannielyim-dev/fda2bd3bd3e76275b3e62b0f381cf184/raw/bus_config.json';
+const HKO_URL = 'https://data.weather.gov.hk/weatherAPI/opendata/weather.php?dataType=rhrread&lang=tc';
+var hko_last_icon = "";
+var hko_last_message = "";
 
 async function getConfigByKey(key) {
   try {
@@ -24,6 +27,44 @@ async function getConfigByKey(key) {
     return config[key] || null;
   } catch (error) {
     console.error('Failed to retrieve config key:', error);
+  }
+}
+
+async function getHKOData() {
+  try {
+    const response = await fetch(HKO_URL);
+    console.log(response);
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! Status: ${response.status}`);
+    }
+
+    const hkoData = await response.json();
+	const icon = hkoData["icon"] || null;
+	const message = (hkoData["warningMessage"] || "") + ( hkoData["specialWxTips"] || "");
+    console.log("HKO data: " + icon + "," + message);
+	
+	if (hko_last_icon !== icon || hko_last_message !== message) {
+		var weatherDiv = document.getElementById("weather");
+		
+		if (weatherDiv) {
+			divContent = "";
+			if (icon !== null) {
+				// 2. 將 HKO 網址填入圖片標籤，並設定寬高使其不超出卡片
+				divContent += '<img src="https://www.hko.gov.hk/images/HKOWxIconOutline/pic'+icon+'.png" alt="天氣圖標" style="max-width: 100%; height: auto;">';
+			}
+			if (message !== null) {
+				// 2. 將 HKO 網址填入圖片標籤，並設定寬高使其不超出卡片
+				divContent += '<p>'+message+'</p>';
+			}
+			weatherDiv.innerHTML = divContent;
+		}
+	}
+	hko_last_icon = icon;
+	hko_last_message = message;
+	
+  } catch (error) {
+    console.error('Failed to retrieve HKO Data:', error);
   }
 }
 
@@ -55,8 +96,8 @@ async function loadVersionData(selectedVersion) {
     versionCurrent = 1;
   } else if (selectedVersion === "2") {
     versionCurrent = 2;
-    if(document.getElementById('weather')) document.getElementById('weather').style.display = 'none';
-    if(document.getElementById('results')) document.getElementById('results').style.width = '100%';
+    if(document.getElementById('weather')) document.getElementById('weather').style.width = '20%';
+    if(document.getElementById('results')) document.getElementById('results').style.width = '80%';
     
     isReload = true;
     // 💡 Use 'await' to resolve the Promise into the actual route array
@@ -65,8 +106,8 @@ async function loadVersionData(selectedVersion) {
     
   } else if (selectedVersion === "3") {
     versionCurrent = 3;
-    if(document.getElementById('weather')) document.getElementById('weather').style.display = 'none';
-    if(document.getElementById('results')) document.getElementById('results').style.width = '100%';
+    if(document.getElementById('weather')) document.getElementById('weather').style.display = '20%';
+    if(document.getElementById('results')) document.getElementById('results').style.width = '80%';
 
     isReload = true;
     // 💡 Use 'await' to resolve the Promise into the actual route array
@@ -77,9 +118,11 @@ async function loadVersionData(selectedVersion) {
 
 function startLiveTracking(activeRouteList) {
     fetchBusETA(activeRouteList);
+	getHKOData();
     startCountdown();
     refreshTimer = setInterval(function() {
         fetchBusETA(activeRouteList);
+		getHKOData();
         startCountdown(); 
     }, 15000); 
 }
@@ -109,6 +152,7 @@ function startCountdown() {
         }
     }, 1000);
 }
+
 
 function padZero(num) {
     return num < 10 ? '0' + num : num;
