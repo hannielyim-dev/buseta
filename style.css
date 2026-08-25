@@ -1,6 +1,16 @@
+@font-face {
+  font-family: 'KMBHead';
+  
+  /* 請確保這裡的相對路徑與你的專案檔案結構相符 */
+  src: url('KMBFont.otf') format('opentype');
+  
+  font-weight: normal;
+  font-style: normal;
+}
 body { 
 	font-family: Arial, sans-serif;
-	}
+}
+
 #weather-eta {
 	width: 100%; 
 	display: flex; 
@@ -35,12 +45,17 @@ body {
 .route-general {
 	font-size: 80px;
 	margin: 0;
+	font-family: 'KMBHead', 'Microsoft JhengHei', sans-serif;
+	letter-spacing: -4px;
 }
 /* ⚪ 樣式 W：白底黑字（加上細邊框顯得更清楚） */
 .route-w {
-    background-color: #ffffff !important;
+    /*background-color: #ffffff !important;
     color: #000000 !important;
     border: 2px solid #000000;
+	*/
+	background-color: #000000 !important;
+    color: #ffffff !important;
 }
 
 /* 🟢 樣式 G：綠底白字（對應普通全日屯門過海線 960 等） */
@@ -59,6 +74,10 @@ body {
     background-color: #0080FF !important;
     color: #ffffff !important;
 }
+.route-p {
+    background-color: #6F2A8C !important;
+    color: #ffffff !important;
+}
 .route-k {
     background-color: #000000 !important;
     color: #ffffff !important;
@@ -71,9 +90,7 @@ body {
 }
 .eta-row {
 	text-align: right;
-	margin-bottom: 10px;
 	border-bottom: 1px dashed #eee;
-	padding-bottom: 5px;
 }
 .flash-red {
   animation: pulse-red 1.5s infinite;
