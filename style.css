@@ -86,6 +86,9 @@ body {
 .flash-red {
   animation: pulse-red 1.5s infinite;
 }
+.route-dest {
+	color: #555; font-weight: bold; font-size: 25px; margin: 0;
+}
 .eta-time {
 	margin-left: 10px;
 	color:blue;
@@ -127,4 +130,14 @@ body {
 #weather-icon {
 	max-width: 100%; 
 	height: auto;
+}
+.warning-symbol {
+	display: flex;
+	gap: 8px;
+	margin-bottom: 10px;
+	width: 100%;
+}
+.warning-symbol img {
+	width: 32px; 
+	height: 32px;
 }
