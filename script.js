@@ -236,6 +236,7 @@ function isBusActiveTodayNow(bus) {
 
 function getBusETADataXHR(pBus, url, isCtb, callback) {
     var xhr = new XMLHttpRequest();
+	console.log("Processing url: " + url);
     xhr.open("GET", url, true);
     xhr.onreadystatechange = function() {
         if (xhr.readyState === 4) {
@@ -341,14 +342,14 @@ function fetchBusETA(routeList) {
             if (!a.eta) return 1; if (!b.eta) return -1;
             return new Date(a.eta).getTime() - new Date(b.eta).getTime();
         });
-        var displayDetails = "", dest = "未知目的地"; 
+        var displayDetails = "", dest = ""; 
         if (etaList.length === 0) {
             displayDetails = "<p style='color:red;'>暫無即時班次更新 (X)</p>";
         } else {
             var loopsToRun = Math.min(etaList.length, 5);
             for (var cnt = 0; cnt < loopsToRun; cnt++) {
                 var item = etaList[cnt]; 
-                if (dest == "未知目的地") dest = item.dest_tc || "未知目的地";
+                if (dest == "") dest = item.dest_tc || "";
                 if (item.rmk_tc == "九巴時段" || !item.eta) continue;
                    
                 var etaTime = "無資料";
@@ -393,7 +394,7 @@ function fetchBusETA(routeList) {
 		}
 
         var cardDiv = '<div class="c-route"><p class="route-general route-' + bus.routeType + '"><strong>' + formattedRoute 
-					+ '</strong></p><p style="color: #555; font-weight: bold;">' + dest + '</p></div><div class="c-details">' + displayDetails + '</div>';
+					+ '</strong></p><p style="color: #555; font-weight: bold; font-size: 25px; margin: 0">' + dest + '</p></div><div class="c-details">' + displayDetails + '</div>';
         if (resultsByRouteDiv) resultsByRouteDiv.innerHTML = cardDiv;
         processRouteAtIndex(index + 1);
     }
