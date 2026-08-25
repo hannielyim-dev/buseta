@@ -27,10 +27,12 @@ body {
 .c-route {
 	flex: 1; 
 	text-align: center;
+	width: 30%;
 }
 .c-details {
 	flex: 2; 
 	padding-left: 10px;
+	width: 70%;
 }
 .route-general {
 	font-size: 80px;
@@ -63,6 +65,12 @@ body {
     background-color: #000000 !important;
     color: #ffffff !important;
 }
+.small-suffix {
+  font-size: 0.7em;       /* 縮小為原本字體大小的 65% (可依喜好自行調整) */
+  vertical-align: baseline; /* 確保字母底部與數字維持在同一條水平線上 */
+  margin-left: 1px;        /* 讓字母與前面的數字產生一點微小的間距，避免太擠 */
+  display: inline-block;   /* 確保縮小效果穩定套用 */
+}
 .eta-row {
 	text-align: right;
 	margin-bottom: 10px;
@@ -71,6 +79,22 @@ body {
 }
 .flash-red {
   animation: pulse-red 1.5s infinite;
+}
+.eta-time {
+	margin-left: 10px;
+	color:blue;
+	font-weight:bold;
+	font-size: 16px;
+}
+.eta-remain-time {
+	margin-left: 10px;
+	color:blue;
+	font-weight:bold;
+	font-size: 16px;
+}
+.eta-remain-time {
+	margin: 2px 0;
+	display: inline-block;
 }
 
 @keyframes pulse-red {
