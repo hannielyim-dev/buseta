@@ -84,3 +84,13 @@ body {
     background-color: rgba(255, 0, 0, 0); /* 變回透明 */
   }
 }
+
+#weather {
+  background-color: #003366; /* 香港天文台標誌的主題深藍色 */
+  padding: 12px;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1); /* 加上微弱陰影更立體 */
+  color: #ffffff;
+  margin-right: 5px;
+
+}
