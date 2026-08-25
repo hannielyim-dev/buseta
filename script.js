@@ -92,7 +92,7 @@ async function fetchHKOData() {
     }
 		
     if (weatherMsg) {
-        weatherMsg.innerHTML = message;
+        weatherMsg.innerHTML = message.replace("市民", "牛姐");
     }
 	
     hko_last_icon = icon;
@@ -370,10 +370,24 @@ function fetchBusETA(routeList) {
                         dynamicRemainingText = "<span style='color:orange; font-weight:bold;'>抵達中/已過</span>";
                     }
                 } else { dynamicRemainingText = "X"; }
-                displayDetails += '<div class="' + rowClass + '"><p style="margin: 2px 0;"><small style="color: #777;">' + remark + '</small> <span style="color: green;">(' + dynamicRemainingText + ')</span><span style="margin-left: 10px; color:blue; font-weight:bold; font-size: 16px;">' + etaTime + '</span></p></div>';
+                displayDetails += '<div class="' + rowClass + '"><p class="eta-remain-time"> <span style="color: green;">(' + dynamicRemainingText + ')</p></span><div style="display: inline-block;"><small style="color: #777;">' + remark + '</small><br><span class="eta-time">' + etaTime + '</span></p></div></div>';
             }
         }
-        var cardDiv = '<div class="c-route"><p class="route-general route-' + bus.routeType + '"><strong>' + bus.route + '</strong></p><p style="color: #555; font-weight: bold;">' + dest + '</p></div><div class="c-details">' + displayDetails + '</div>';
+		
+		// 💡 1. 檢查路線名稱（例如 "89D"）的最後一個字元是不是英文字母 (A-Z)
+		var formattedRoute = bus.route; // 預設值
+
+		if (/[A-Z]$/i.test(bus.route)) {
+			// 如果最後一個字是字母，將其拆開：抓取除了最後一碼以外的全部字元 + 最後一碼字母
+			var routeNumber = bus.route.slice(0, -1);
+			var routeLetter = bus.route.slice(-1);
+			
+			// 用 span 標籤把最後的字母包起來，並賦予一個 class 名稱叫 "small-suffix"
+			formattedRoute = routeNumber + '<span class="small-suffix">' + routeLetter + '</span>';
+		}
+
+        var cardDiv = '<div class="c-route"><p class="route-general route-' + bus.routeType + '"><strong>' + formattedRoute 
+					+ '</strong></p><p style="color: #555; font-weight: bold;">' + dest + '</p></div><div class="c-details">' + displayDetails + '</div>';
         if (resultsByRouteDiv) resultsByRouteDiv.innerHTML = cardDiv;
         processRouteAtIndex(index + 1);
     }
