@@ -37,12 +37,12 @@ const HKO_PRECISE_ICONS = {
   // ⚡ 其他天氣警告 (對照說明書：Key 必須完全符合 API 回傳的 code 欄位值)
   "WTS": "ts",          // 💡 修正：雷暴警告（API 回傳 "WTS"，對應官方圖標 ts.gif）
   "WCOLD": "cold",      // 寒冷天氣警告
-  "WHOT": "hot",        // 酷熱天氣警告
-  "WMSGNL": "mon",      // 強烈季候風信號
-  "WL": "slip",         // 山泥傾瀉警告
-  "WFNTSA": "ntflood",  // 新界北部水浸特別報告
+  "WHOT": "vhot",        // 酷熱天氣警告
+  "WMSGNL": "msn",      // 強烈季候風信號
+  "WL": "landslip",         // 山泥傾瀉警告
+  "WFNTSA": "ntfl",  // 新界北部水浸特別報告
   "WFROST": "frost",    // 霜凍警告
-  "WTMW": "tsunami"     // 海嘯警告
+  "WTMW": "tsunami-warn"     // 海嘯警告
 };
 
 async function getConfigByKey(key) {
