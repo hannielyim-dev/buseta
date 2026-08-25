@@ -13,10 +13,37 @@ var message = "";
 
 const CONFIG_URL = 'https://gist.githubusercontent.com/hannielyim-dev/fda2bd3bd3e76275b3e62b0f381cf184/raw/bus_config.json';
 const HKO_URL = 'https://data.weather.gov.hk/weatherAPI/opendata/weather.php?dataType=rhrread&lang=tc';
+const HKO_WARN_URL = 'https://data.weather.gov.hk/weatherAPI/opendata/weather.php?dataType=warnsum&lang=tc';
 var hko_last_icon = "";
 
 var is_data_found = false;
 
+// 💡 根據最新官方說明書（第 9 頁）的 .code 欄位精準修正 Key 值
+const HKO_PRECISE_ICONS = {
+  // 🌧️ 暴雨警告系列 (精準區分顏色)
+  "WRAINA": "raina",   // 黃色暴雨警告信號
+  "WRAINR": "rainr",   // 紅色暴雨警告信號
+  "WRAINB": "rainb",   // 黑色暴雨警告信號
+  
+  // 🔥 火災危險警告系列 (精準區分顏色)
+  "WFIREY": "firey",   // 黃色火災危險警告
+  "WFIRER": "firer",   // 紅色火災危險警告
+  
+  // 🌪️ 熱帶氣旋警告信號系列 (風球信號)
+  "TC1": "tc1", "TC3": "tc3", 
+  "TC8NE": "tc8ne", "TC8NW": "tc8nw", "TC8SE": "tc8se", "TC8SW": "tc8sw", 
+  "TC9": "tc9", "TC10": "tc10",
+  
+  // ⚡ 其他天氣警告 (對照說明書：Key 必須完全符合 API 回傳的 code 欄位值)
+  "WTS": "ts",          // 💡 修正：雷暴警告（API 回傳 "WTS"，對應官方圖標 ts.gif）
+  "WCOLD": "cold",      // 寒冷天氣警告
+  "WHOT": "hot",        // 酷熱天氣警告
+  "WMSGNL": "mon",      // 強烈季候風信號
+  "WL": "slip",         // 山泥傾瀉警告
+  "WFNTSA": "ntflood",  // 新界北部水浸特別報告
+  "WFROST": "frost",    // 霜凍警告
+  "WTMW": "tsunami"     // 海嘯警告
+};
 
 async function getConfigByKey(key) {
   try {
@@ -37,16 +64,57 @@ async function getConfigByKey(key) {
 // 💡 修正 1：在 function 前面務必加上 async
 async function fetchHKOData() {
   try {
-    const response = await fetch(HKO_URL);
-    console.log(response);
-    
-    if (!response.ok) {
-      throw new Error(`HTTP error! Status: ${response.status}`);
-    }
+   // 💡 同時發送兩個 API 請求 (包含詳細警告資訊)
+	const [weatherRes, warnRes] = await Promise.all([
+	  fetch(HKO_URL), // 你的現時天氣 API 網址
+	  fetch(HKO_WARN_URL)
+	]);
 
-    const hkoData = await response.json();
+	if (!weatherRes.ok || !warnRes.ok) throw new Error("API 請求失敗");
+	
+	const hkoData = await weatherRes.json();
+    const warnData = await warnRes.json();
+    console.log(hkoData);
+    console.log(warnData);
+	
+	var warningIconsHTML = "";
+	var hasActiveWarning = false;
+	// 檢查 warnsum 是否有資料
+    if (warnData && Object.keys(warnData).length > 0) {
+        // 使用 Flexbox 讓多個警告圖標可以橫向排成一排
+        var iconTags = "";
+        
+        for (var key in warnData) {
+            var alertItem = warnData[key];
+            
+            // 只有當 actionCode 是 ISSUE (代表目前正生效中) 時才渲染
+            if (alertItem && alertItem.actionCode === "ISSUE") {
+                var currentCode = alertItem.code; // 這裡會拿到 "WRAINB", "WHOT", "WFNTSA" 等等
+				
+				console.log(currentCode);
+                
+                if (currentCode && HKO_PRECISE_ICONS[currentCode]) {
+                    hasActiveWarning = true;
+                    var imgName = HKO_PRECISE_ICONS[currentCode];
+                    var imgURL = "https://www.hko.gov.hk/en/wxinfo/dailywx/images/" + imgName + ".gif";
+					console.log(imgURL);
+                    
+                    // 生成警告圖標圖片標籤
+                    iconTags += "<img src='" + imgURL + "' title='" + alertItem.name + "'>";
+                }
+            }
+        }
+        
+        // 如果有任何生效中的警告，用一個容器把所有圖標包起來
+        if (hasActiveWarning) {
+            warningIconsHTML = "<div class = 'warning-symbol'>" + iconTags + "</div>";
+        }
+    }
+	document.getElementById("weather-signal").innerHTML = warningIconsHTML;
+
     const icon = hkoData["icon"] || null;
-    
+    var message = (hkoData["warningMessage"] || "") + (hkoData["specialWxTips"] || "");
+        
     // 💡 修正 2：將原本的引號換行符號 /n 改為網頁適用的 <br> 標籤
 	var shatinTemp = "N/A";
     var shatinRain = "0";
@@ -394,7 +462,7 @@ function fetchBusETA(routeList) {
 		}
 
         var cardDiv = '<div class="c-route"><p class="route-general route-' + bus.routeType + '"><strong>' + formattedRoute 
-					+ '</strong></p><p style="color: #555; font-weight: bold; font-size: 25px; margin: 0">' + dest + '</p></div><div class="c-details">' + displayDetails + '</div>';
+					+ '</strong></p><p class="route-dest">' + dest + '</p></div><div class="c-details">' + displayDetails + '</div>';
         if (resultsByRouteDiv) resultsByRouteDiv.innerHTML = cardDiv;
         processRouteAtIndex(index + 1);
     }
