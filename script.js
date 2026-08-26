@@ -88,7 +88,7 @@ async function fetchHKOData() {
             var alertItem = warnData[key];
             
             // 只有當 actionCode 是 ISSUE (代表目前正生效中) 時才渲染
-            if (alertItem && alertItem.actionCode === "ISSUE") {
+            if (alertItem && alertItem.actionCode !== "CANCEL") {
                 var currentCode = alertItem.code; // 這裡會拿到 "WRAINB", "WHOT", "WFNTSA" 等等
 				
 				console.log(currentCode);
