@@ -162,7 +162,7 @@ async function fetchHKOData() {
     }
 		
 	if (versionCurrent === "2") {
-		message = message.replace("市民", "牛姐");
+		message = message.replaceAll("市民", "牛姐");
 	}
 		
     if (weatherMsg) {
